@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElCanadi - Transparent Navbar Over Hero</title>
+  <style>
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      color: #333;
+    }
+
+    /* Navbar - COMPLETELY TRANSPARENT */
+    .navbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.5rem 2rem;
+      background: transparent; /* NO background */
+    }
+
+    .navbar-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-logo a {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: white; /* White text over hero image */
+      text-decoration: none;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Shadow for visibility */
+    }
+
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    /* Language Selector */
+    .language-selector {
+      position: relative;
+    }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.8); /* White border */
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: white; /* White text */
+      transition: all 0.2s;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .lang-btn:hover {
+      border-color: white;
+      background: rgba(255, 255, 255, 0.2); /* Subtle white background on hover */
+    }
+
+    .lang-icon {
+      font-size: 1.1rem;
+    }
+
+    .lang-arrow {
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
+
+    .lang-dropdown {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      min-width: 140px;
+      display: none;
+      overflow: hidden;
+    }
+
+    .language-selector:hover .lang-dropdown {
+      display: block;
+    }
+
+    .lang-dropdown a {
+      display: block;
+      padding: 0.75rem 1.25rem;
+      text-decoration: none;
+      color: #333;
+      transition: background 0.2s;
+    }
+
+    .lang-dropdown a:hover {
+      background: #f5f5f5;
+    }
+
+    /* Sign In Button */
+    .sign-in-btn {
+      padding: 0.5rem 1.5rem;
+      border: 1px solid white; /* White border */
+      border-radius: 6px;
+      text-decoration: none;
+      color: white; /* White text */
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .sign-in-btn:hover {
+      background: white; /* White background on hover */
+      color: #333; /* Dark text on hover */
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Use your hero image here */
+      background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    /* Optional: Dark overlay for better text visibility */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3); /* Optional dark overlay */
+      z-index: 0;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+      letter-spacing: -1px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      margin-bottom: 2.5rem;
+      opacity: 0.95;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-primary {
+      padding: 1rem 2.5rem;
+      background: white;
+      color: #333;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .cta-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .cta-secondary {
+      padding: 1rem 2.5rem;
+      background: transparent;
+      color: white;
+      text-decoration: none;
+      border: 2px solid white;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .cta-secondary:hover {
+      background: white;
+      color: #333;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 1rem;
+      }
+      
+      .navbar-logo a {
+        font-size: 1.5rem;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .lang-text {
+        display: none; /* Hide text on mobile, show only icon */
+      }
+      
+      .lang-btn {
+        color: white;
+        border-color: rgba(255, 255, 255, 0.8);
+      }
+      
+      .sign-in-btn {
+        color: white;
+        border-color: white;
+      }
+      
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.1rem;
+      }
+      
+      .hero-cta {
+        flex-direction: column;
+      }
+      
+      .cta-primary,
+      .cta-secondary {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar - Transparent, over hero -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-logo">
+        <a href="/">ElCanadi</a>
+      </div>
+      
+      <div class="navbar-actions">
+        <!-- Language Selector -->
+        <div class="language-selector">
+          <button class="lang-btn">
+            <span class="lang-icon">🌐</span>
+            <span class="lang-text">English</span>
+            <span class="lang-arrow">▼</span>
+          </button>
+          <div class="lang-dropdown">
+            <a href="?lang=en">English</a>
+            <a href="?lang=ar">العربية</a>
+          </div>
+        </div>
+        
+        <!-- Sign In -->
+        <a href="/login" class="sign-in-btn">Sign In</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Learn Arabic the Right Way</h1>
+      <p class="hero-subtitle">
+        Master Arabic language with our comprehensive courses
+        designed for all levels
+      </p>
+      <div class="hero-cta">
+        <a href="/courses" class="cta-primary">Browse Courses</a>
+        <a href="/signup" class="cta-secondary">Get Started</a>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
+

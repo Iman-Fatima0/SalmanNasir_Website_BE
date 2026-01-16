@@ -13,8 +13,10 @@
     "lint:fix": "eslint src/ --fix",
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
+    "clear-seed": "node scripts/clear_seed_data.js",
     "create-db": "node scripts/create_database.js",
-    "test-db": "node scripts/test_db_connection.js"
+    "test-db": "node scripts/test_db_connection.js",
+    "add-role-column": "node scripts/add_role_column.js"
   },
   "keywords": [
     "backend",
