@@ -10,7 +10,7 @@ class CourseRepository {
     
     try {
       let product;
-      
+
       // If productId is provided, use existing product
       if (courseData.productId) {
         product = await Product.findByPk(courseData.productId, { transaction });
@@ -27,7 +27,10 @@ class CourseRepository {
         if (courseData.slug !== undefined) product.slug = courseData.slug;
         await product.save({ transaction });
       } else {
-        // Create new product
+        // Create new product with unique slug
+        const baseSlug = courseData.slug || this.generateSlug(courseData.title);
+        const uniqueSlug = await this.generateUniqueSlug(baseSlug, transaction);
+
         product = await Product.create(
           {
             type: 'course',
@@ -36,7 +39,7 @@ class CourseRepository {
             description: courseData.description,
             price: courseData.price,
             currency: courseData.currency || 'USD',
-            slug: courseData.slug || this.generateSlug(courseData.title),
+            slug: uniqueSlug,
           },
           { transaction }
         );
@@ -76,8 +79,12 @@ class CourseRepository {
                   title: lessonData.title,
                   description: lessonData.description,
                   order: lessonData.order,
-                  videoUrl: lessonData.videoUrl,
-                  durationMinutes: lessonData.durationMinutes,
+                  type: lessonData.type || 'VIDEO',
+                  videoUrl: lessonData.videoUrl || null,
+                  audioUrl: lessonData.audioUrl || null,
+                  contentUrl: lessonData.contentUrl || null,
+                  textContent: lessonData.textContent || null,
+                  durationMinutes: lessonData.durationMinutes || null,
                   isPreview: lessonData.isPreview || false,
                 },
                 { transaction }
@@ -324,6 +331,35 @@ class CourseRepository {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
+  }
+
+  /**
+   * Helper: Ensure slug is unique by appending -2, -3, ...
+   * Uses the given transaction to avoid race conditions during create.
+   */
+  async generateUniqueSlug(baseSlug, transaction) {
+    let slug = baseSlug || 'course';
+    let suffix = 1;
+
+    // Check if slug already exists
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // Look for existing product with this slug
+      // Use the transaction so the check is consistent within the create flow
+      const existing = await Product.findOne({
+        where: { slug },
+        transaction,
+      });
+
+      if (!existing) {
+        // Slug is free
+        return slug;
+      }
+
+      // Slug taken, append / increment numeric suffix
+      suffix += 1;
+      slug = `${baseSlug}-${suffix}`;
+    }
   }
 
   /**

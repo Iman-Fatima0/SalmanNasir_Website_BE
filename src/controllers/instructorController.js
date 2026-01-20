@@ -3,61 +3,110 @@ const response = require('../utils/response');
 
 class InstructorController {
   /**
-   * Create a new instructor
+   * Get analytics overview for instructor
    */
-  async create(req, res, next) {
+  async getAnalyticsOverview(req, res, next) {
     try {
-      const instructor = await instructorService.createInstructor(req.body);
-      return response.success(res, instructor, 'Instructor created successfully', 201);
+      const analytics = await instructorService.getAnalyticsOverview(req.user.id);
+      return response.success(res, analytics, 'Analytics retrieved successfully');
     } catch (error) {
       next(error);
     }
   }
 
   /**
-   * Get all instructors
+   * Get analytics for a specific course
    */
-  async getAll(req, res, next) {
+  async getCourseAnalytics(req, res, next) {
     try {
-      const result = await instructorService.getInstructors(req.query);
-      return response.success(res, result, 'Instructors retrieved successfully');
+      const analytics = await instructorService.getCourseAnalytics(
+        req.params.courseId,
+        req.user.id
+      );
+      return response.success(res, analytics, 'Course analytics retrieved successfully');
     } catch (error) {
       next(error);
     }
   }
 
   /**
-   * Get instructor by ID
+   * Get all courses for instructor
    */
-  async getById(req, res, next) {
+  async getMyCourses(req, res, next) {
     try {
-      const includeCourses = req.query.includeCourses === 'true';
-      const instructor = await instructorService.getInstructorById(req.params.id, includeCourses);
-      return response.success(res, instructor, 'Instructor retrieved successfully');
+      const courses = await instructorService.getMyCourses(req.user.id, req.query);
+      return response.success(res, courses, 'Courses retrieved successfully');
     } catch (error) {
       next(error);
     }
   }
 
   /**
-   * Update instructor
+   * Get course by ID (must be instructor's course)
    */
-  async update(req, res, next) {
+  async getCourseById(req, res, next) {
     try {
-      const instructor = await instructorService.updateInstructor(req.params.id, req.body);
-      return response.success(res, instructor, 'Instructor updated successfully');
+      const course = await instructorService.getCourseById(req.params.id, req.user.id);
+      return response.success(res, { course }, 'Course retrieved successfully');
     } catch (error) {
       next(error);
     }
   }
 
   /**
-   * Delete instructor
+   * Update course (must be instructor's course)
    */
-  async delete(req, res, next) {
+  async updateCourse(req, res, next) {
     try {
-      await instructorService.deleteInstructor(req.params.id);
-      return response.success(res, null, 'Instructor deleted successfully');
+      const course = await instructorService.updateCourse(
+        req.params.id,
+        req.user.id,
+        req.body
+      );
+      return response.success(res, course, 'Course updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get all students enrolled in instructor's courses
+   */
+  async getStudents(req, res, next) {
+    try {
+      const students = await instructorService.getStudents(req.user.id, req.query);
+      return response.success(res, students, 'Students retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get students enrolled in a specific course
+   */
+  async getCourseStudents(req, res, next) {
+    try {
+      const students = await instructorService.getCourseStudents(
+        req.params.courseId,
+        req.user.id
+      );
+      return response.success(res, students, 'Course students retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get student progress in a course
+   */
+  async getStudentProgress(req, res, next) {
+    try {
+      const progress = await instructorService.getStudentProgress(
+        req.params.courseId,
+        req.params.studentId,
+        req.user.id
+      );
+      return response.success(res, progress, 'Student progress retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -65,4 +114,3 @@ class InstructorController {
 }
 
 module.exports = new InstructorController();
-

@@ -47,7 +47,7 @@ const sequelize = new Sequelize(
     host: config.DB_HOST,
     port: config.DB_PORT,
     dialect: 'postgres',
-    logging: config.NODE_ENV === 'development' ? false : false,
+    logging: false,
     pool: {
       max: 5,
       min: 0,
@@ -63,11 +63,11 @@ module.exports = sequelize;
 // Load all models and associations through the central model loader
 // This ensures proper initialization order and eliminates circular dependencies
 // #region agent log
-try{const logPath=path.join(__dirname,'../../.cursor/debug.log');const logData={location:'database.js:beforeModels',message:'Before loading models via index.js',data:{sequelizeType:typeof sequelize,sequelizeDefined:!!sequelize},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'};fs.appendFileSync(logPath,JSON.stringify(logData)+'\n');}catch(e){}
+try{const logPath=path.join(__dirname,'../../.cursor/debug.log');const logData={location:'database.js:beforeModels',message:'Before loading models via index.js',data:{sequelizeType:typeof sequelize,sequelizeDefined:!!sequelize},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'};fs.appendFileSync(logPath,JSON.stringify(logData)+'\n');}catch(e){/* Debug logging failed silently */}
 // #endregion
 require('../models/index');
 // #region agent log
-try{const logPath=path.join(__dirname,'../../.cursor/debug.log');const logData={location:'database.js:afterModels',message:'After loading models via index.js',data:{modelsLoaded:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'};fs.appendFileSync(logPath,JSON.stringify(logData)+'\n');}catch(e){}
+try{const logPath=path.join(__dirname,'../../.cursor/debug.log');const logData={location:'database.js:afterModels',message:'After loading models via index.js',data:{modelsLoaded:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'};fs.appendFileSync(logPath,JSON.stringify(logData)+'\n');}catch(e){/* Debug logging failed silently */}
 // #endregion
 
 // Test connection

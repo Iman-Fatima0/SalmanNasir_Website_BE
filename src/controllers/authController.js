@@ -34,6 +34,7 @@ class AuthController {
     try {
       const provider = req.provider || req.params.provider;
       const profile = req.user; // Set by passport strategy
+      const state = req.query.state || ''; // e.g. courseId passed through OAuth
 
       if (!profile) {
         const config = require('../config/env');
@@ -42,10 +43,17 @@ class AuthController {
 
       const result = await authService.oauthLogin(provider, profile);
 
-      // Redirect to frontend with token
+      // Redirect to frontend with token (and optional state, e.g. courseId)
       const config = require('../config/env');
       const frontendUrl = config.FRONTEND_URL || 'http://localhost:3000';
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${result.token}&user=${encodeURIComponent(JSON.stringify(result.user))}`;
+      const queryParams = new URLSearchParams({
+        token: result.token,
+        user: JSON.stringify(result.user),
+      });
+      if (state) {
+        queryParams.set('courseId', state);
+      }
+      const redirectUrl = `${frontendUrl}/auth/callback?${queryParams.toString()}`;
       
       res.redirect(redirectUrl);
     } catch (error) {

@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
+const { validateOrderTransition } = require('../utils/stateMachine');
 
 /**
- * Define Order model
+ * Define Order model with state machine validation
  * @param {Sequelize} sequelize - Sequelize instance
  * @returns {Model} Order model
  */
@@ -60,6 +61,20 @@ function defineOrder(sequelize) {
     {
       tableName: 'orders',
       timestamps: true,
+      hooks: {
+        beforeUpdate: async (order, options) => {
+          // Validate state transition if status is being changed
+          if (order.changed('status')) {
+            const originalStatus = order.previous('status');
+            const newStatus = order.status;
+
+            const validation = validateOrderTransition(originalStatus, newStatus);
+            if (!validation.valid) {
+              throw new Error(validation.message);
+            }
+          }
+        },
+      },
     }
   );
 

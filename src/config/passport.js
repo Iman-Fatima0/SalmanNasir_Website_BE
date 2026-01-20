@@ -27,7 +27,7 @@ if (config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET) {
       {
         clientID: config.GOOGLE_CLIENT_ID,
         clientSecret: config.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${config.CORS_ORIGIN}${config.GOOGLE_CALLBACK_URL}`,
+        callbackURL: `${config.BACKEND_URL || `http://localhost:${config.PORT || 3000}`}${config.GOOGLE_CALLBACK_URL}`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

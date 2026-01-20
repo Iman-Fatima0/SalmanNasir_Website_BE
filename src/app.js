@@ -10,7 +10,10 @@ const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const instructorRoutes = require('./routes/instructorRoutes');
+const publicInstructorRoutes = require('./routes/publicInstructorRoutes');
+const studentRoutes = require('./routes/studentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // Initialize Express app
 const app = express();
@@ -27,9 +30,13 @@ app.use(
 );
 
 // Body parsing middleware
+// Note: Don't parse JSON/URL-encoded for upload routes (multer handles multipart/form-data)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// Serve uploaded files statically
+app.use('/uploads', express.static('uploads'));
 
 // Logging middleware
 if (config.NODE_ENV === 'development') {
@@ -48,9 +55,12 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/student', studentRoutes);
 app.use('/api/courses', courseRoutes);
-app.use('/api/instructors', instructorRoutes);
+app.use('/api/instructors', publicInstructorRoutes); // Public instructor routes (browsing)
+app.use('/api/instructor', instructorRoutes); // Authenticated instructor routes (managing own courses)
 app.use('/api/admin', adminRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 handler
 app.use((req, res) => {

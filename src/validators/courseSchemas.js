@@ -5,10 +5,54 @@ const lessonSchema = Joi.object({
     'any.required': 'Lesson title is required',
   }),
   description: Joi.string().optional().allow(null, ''),
-  order: Joi.number().integer().min(0).required().messages({
-    'any.required': 'Lesson order is required',
+  // Make order optional and default to 0 so frontend doesn't have to send it
+  order: Joi.number().integer().min(0).optional().default(0).messages({
+    'number.base': 'Lesson order must be a number',
+    'number.min': 'Lesson order must be greater than or equal to 0',
   }),
-  videoUrl: Joi.string().uri().optional().allow(null, ''),
+  // Accept lowercase types from frontend (e.g. "text") by uppercasing before validation
+  type: Joi.string()
+    .uppercase()
+    .valid('VIDEO', 'PDF', 'TEXT', 'QUIZ', 'AUDIO')
+    .optional()
+    .default('VIDEO')
+    .messages({
+      'any.only': 'Lesson type must be one of VIDEO, PDF, TEXT, QUIZ, AUDIO',
+    }),
+  videoUrl: Joi.alternatives()
+    .try(
+      Joi.string().uri(),
+      Joi.string().pattern(/^\/uploads\//), // File path pattern
+      Joi.string().allow(null, '')
+    )
+    .optional()
+    .allow(null, '')
+    .messages({
+      'alternatives.match': 'Video URL must be a valid URL or file path starting with /uploads/',
+    }),
+  audioUrl: Joi.alternatives()
+    .try(
+      Joi.string().uri(),
+      Joi.string().pattern(/^\/uploads\//), // File path pattern
+      Joi.string().allow(null, '')
+    )
+    .optional()
+    .allow(null, '')
+    .messages({
+      'alternatives.match': 'Audio URL must be a valid URL or file path starting with /uploads/',
+    }),
+  contentUrl: Joi.alternatives()
+    .try(
+      Joi.string().uri(),
+      Joi.string().pattern(/^\/uploads\//), // File path pattern
+      Joi.string().allow(null, '')
+    )
+    .optional()
+    .allow(null, '')
+    .messages({
+      'alternatives.match': 'Content URL must be a valid URL or file path starting with /uploads/',
+    }),
+  textContent: Joi.string().optional().allow(null, ''),
   durationMinutes: Joi.number().integer().min(0).optional().allow(null),
   isPreview: Joi.boolean().optional(),
 });
@@ -18,8 +62,10 @@ const chapterSchema = Joi.object({
     'any.required': 'Chapter title is required',
   }),
   description: Joi.string().optional().allow(null, ''),
-  order: Joi.number().integer().min(0).required().messages({
-    'any.required': 'Chapter order is required',
+  // Make order optional and default to 0 so frontend doesn't have to send it
+  order: Joi.number().integer().min(0).optional().default(0).messages({
+    'number.base': 'Chapter order must be a number',
+    'number.min': 'Chapter order must be greater than or equal to 0',
   }),
   lessons: Joi.array().items(lessonSchema).optional(),
 });
@@ -56,7 +102,17 @@ const createCourseSchema = Joi.object({
   currency: Joi.string().length(3).optional().default('USD'),
   language: Joi.string().optional().allow(null, ''),
   level: Joi.string().optional().allow(null, ''),
-  thumbnailUrl: Joi.string().uri().optional().allow(null, ''),
+  thumbnailUrl: Joi.alternatives()
+    .try(
+      Joi.string().uri(),
+      Joi.string().pattern(/^\/uploads\//), // File path pattern
+      Joi.string().allow(null, '')
+    )
+    .optional()
+    .allow(null, '')
+    .messages({
+      'alternatives.match': 'Thumbnail URL must be a valid URL or file path starting with /uploads/',
+    }),
   slug: Joi.string().optional(),
   chapters: Joi.array().items(chapterSchema).optional(),
   instructorIds: Joi.array().items(Joi.string().uuid()).optional(),
@@ -71,7 +127,17 @@ const updateCourseSchema = Joi.object({
   currency: Joi.string().length(3).optional(),
   language: Joi.string().optional().allow(null, ''),
   level: Joi.string().optional().allow(null, ''),
-  thumbnailUrl: Joi.string().uri().optional().allow(null, ''),
+  thumbnailUrl: Joi.alternatives()
+    .try(
+      Joi.string().uri(),
+      Joi.string().pattern(/^\/uploads\//), // File path pattern
+      Joi.string().allow(null, '')
+    )
+    .optional()
+    .allow(null, '')
+    .messages({
+      'alternatives.match': 'Thumbnail URL must be a valid URL or file path starting with /uploads/',
+    }),
   isPublished: Joi.boolean().optional(),
   chapters: Joi.array().items(chapterSchema).optional(),
   instructorIds: Joi.array().items(Joi.string().uuid()).optional(),

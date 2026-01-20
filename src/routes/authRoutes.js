@@ -20,10 +20,15 @@ router.post('/reset-password', validate(resetPasswordSchema), authController.res
 router.get('/me', authenticate, authController.getMe);
 
 // OAuth routes - Google
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+// Accept optional ?state=<courseId> so we can preserve course context through OAuth
+router.get('/google', (req, res, next) => {
+  const state = req.query.state || undefined;
+  const authenticator = passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    state,
+  });
+  authenticator(req, res, next);
+});
 router.get(
   '/google/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),

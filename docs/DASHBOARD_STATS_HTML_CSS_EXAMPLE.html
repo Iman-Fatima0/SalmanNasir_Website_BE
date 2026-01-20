@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard Stats Cards</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #F9FAFB;
+      padding: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      border: 1px solid #E5E7EB;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card-icon-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .stat-card-icon-bg {
+      background: #F3F4F6;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-card-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: #374151;
+    }
+
+    .stat-card-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #6B7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-card-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .stat-card-trend {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-card-trend-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .stat-card-trend-badge.up {
+      background: #D1FAE5;
+      color: #10B981;
+    }
+
+    .stat-card-trend-badge.down {
+      background: #FEE2E2;
+      color: #EF4444;
+    }
+
+    .stat-card-trend-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .stat-card-trend-text {
+      font-size: 0.875rem;
+      color: #6B7280;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stats-grid">
+    <!-- Total Revenue Card -->
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="stat-card-icon-container">
+          <div class="stat-card-icon-bg">
+            <i data-lucide="dollar-sign" class="stat-card-icon"></i>
+          </div>
+          <h3 class="stat-card-title">Total Revenue</h3>
+        </div>
+      </div>
+      <div class="stat-card-value">$0.00</div>
+      <div class="stat-card-trend">
+        <div class="stat-card-trend-badge down">
+          <i data-lucide="trending-down" class="stat-card-trend-icon"></i>
+          <span>0%</span>
+        </div>
+        <span class="stat-card-trend-text">Lower than Last Month</span>
+      </div>
+    </div>
+
+    <!-- Active Students Card -->
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="stat-card-icon-container">
+          <div class="stat-card-icon-bg">
+            <i data-lucide="users" class="stat-card-icon"></i>
+          </div>
+          <h3 class="stat-card-title">Active Students</h3>
+        </div>
+      </div>
+      <div class="stat-card-value">5</div>
+      <div class="stat-card-trend">
+        <div class="stat-card-trend-badge up">
+          <i data-lucide="trending-up" class="stat-card-trend-icon"></i>
+          <span>100%</span>
+        </div>
+        <span class="stat-card-trend-text">Higher than Last Month</span>
+      </div>
+    </div>
+
+    <!-- Enrollments Card -->
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="stat-card-icon-container">
+          <div class="stat-card-icon-bg">
+            <i data-lucide="book-open" class="stat-card-icon"></i>
+          </div>
+          <h3 class="stat-card-title">Enrollments</h3>
+        </div>
+      </div>
+      <div class="stat-card-value">0</div>
+      <div class="stat-card-trend">
+        <div class="stat-card-trend-badge down">
+          <i data-lucide="trending-down" class="stat-card-trend-icon"></i>
+          <span>0%</span>
+        </div>
+        <span class="stat-card-trend-text">Lower than Last Month</span>
+      </div>
+    </div>
+
+    <!-- Refund Rate Card -->
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="stat-card-icon-container">
+          <div class="stat-card-icon-bg">
+            <i data-lucide="refresh-ccw" class="stat-card-icon"></i>
+          </div>
+          <h3 class="stat-card-title">Refund Rate</h3>
+        </div>
+      </div>
+      <div class="stat-card-value">0%</div>
+      <div class="stat-card-trend">
+        <div class="stat-card-trend-badge down">
+          <i data-lucide="trending-down" class="stat-card-trend-icon"></i>
+          <span>0%</span>
+        </div>
+        <span class="stat-card-trend-text">Lower than Last Month</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
+

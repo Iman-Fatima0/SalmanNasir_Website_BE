@@ -4,12 +4,14 @@ const { AppError } = require('../utils/errors');
 /**
  * Global error handling middleware
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Log error
-  console.error('Error:', err);
+  // Log error (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Error:', err);
+  }
 
   // Sequelize validation error
   if (err.name === 'SequelizeValidationError') {
@@ -31,8 +33,19 @@ const errorHandler = (err, req, res, next) => {
     return response.error(res, 'Token expired', 401);
   }
 
-  // Custom AppError
+  // Custom AppError (including ValidationError)
   if (err instanceof AppError) {
+    // Log validation errors in development
+    if (process.env.NODE_ENV === 'development' && err.errors) {
+      console.error('\n=== VALIDATION ERRORS ===');
+      console.error('Message:', err.message);
+      console.error('Status Code:', err.statusCode);
+      console.error('Errors:', JSON.stringify(err.errors, null, 2));
+      console.error('Request Method:', req.method);
+      console.error('Request Path:', req.path);
+      console.error('Request Body:', JSON.stringify(req.body, null, 2));
+      console.error('========================\n');
+    }
     return response.error(res, err.message, err.statusCode, err.errors);
   }
 

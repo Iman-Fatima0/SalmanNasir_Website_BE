@@ -31,9 +31,31 @@ function defineLesson(sequelize) {
         allowNull: false,
         defaultValue: 0,
       },
+      type: {
+        type: DataTypes.ENUM('VIDEO', 'PDF', 'TEXT', 'QUIZ', 'AUDIO'),
+        allowNull: false,
+        defaultValue: 'VIDEO',
+        comment: 'Lesson content type',
+      },
       videoUrl: {
         type: DataTypes.STRING,
         allowNull: true,
+        comment: 'Video URL for VIDEO type lessons (can be file path or external URL)',
+      },
+      audioUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: 'Audio URL for AUDIO type lessons (can be file path or external URL)',
+      },
+      contentUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        comment: 'Content URL for PDF type lessons (can be file path or external URL)',
+      },
+      textContent: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Text content for TEXT type lessons',
       },
       durationMinutes: {
         type: DataTypes.INTEGER,

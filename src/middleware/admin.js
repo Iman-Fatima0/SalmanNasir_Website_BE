@@ -1,10 +1,10 @@
 const { AuthenticationError, ForbiddenError } = require('../utils/errors');
+const permissionService = require('../services/permissionService');
 
 /**
  * Admin middleware
- * Checks if user is authenticated and is an admin
- * Note: Currently checks if email is admin@elcanadi.com
- * You can extend this to add a role field to User model
+ * Checks if user is authenticated and has ADMIN role
+ * Falls back to email check for backward compatibility
  */
 const isAdmin = async (req, res, next) => {
   try {
@@ -13,14 +13,13 @@ const isAdmin = async (req, res, next) => {
       throw new AuthenticationError('Authentication required');
     }
 
-    // Check if user is admin
-    // Option 1: Check by email (current implementation)
-    const isAdminUser = req.user.email === 'admin@elcanadi.com';
+    // Check if user has ADMIN role using RBAC
+    const hasAdminRole = await permissionService.hasRole(req.user.id, 'ADMIN');
 
-    // Option 2: If you add a role field to User model, use:
-    // const isAdminUser = req.user.role === 'admin';
+    // Fallback to email check for backward compatibility
+    const isAdminEmail = req.user.email === 'admin@elcanadi.com';
 
-    if (!isAdminUser) {
+    if (!hasAdminRole && !isAdminEmail) {
       throw new ForbiddenError('Admin access required');
     }
 
@@ -30,7 +29,50 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
+/**
+ * Instructor middleware
+ * Checks if user is authenticated and has INSTRUCTOR role
+ */
+const isInstructor = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw new AuthenticationError('Authentication required');
+    }
+
+    const hasInstructorRole = await permissionService.hasRole(req.user.id, 'INSTRUCTOR');
+    const hasAdminRole = await permissionService.hasRole(req.user.id, 'ADMIN');
+
+    // Admin can access instructor endpoints
+    if (!hasInstructorRole && !hasAdminRole) {
+      throw new ForbiddenError('Instructor access required');
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Student middleware
+ * Checks if user is authenticated (any authenticated user is a student)
+ */
+const isStudent = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      throw new AuthenticationError('Authentication required');
+    }
+
+    // Any authenticated user can access student endpoints
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   isAdmin,
+  isInstructor,
+  isStudent,
 };
 

@@ -1,6 +1,8 @@
 const adminService = require('../services/adminService');
 const courseService = require('../services/courseService');
 const instructorService = require('../services/instructorService');
+const instructorRepository = require('../repositories/instructorRepository');
+const courseRepository = require('../repositories/courseRepository');
 const response = require('../utils/response');
 
 class AdminController {
@@ -102,6 +104,33 @@ class AdminController {
   }
 
   /**
+   * Get all courses (admin)
+   */
+  async getAllCourses(req, res, next) {
+    try {
+      const courses = await courseRepository.findAll(req.query);
+      return response.success(res, courses, 'Courses retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get course by ID (admin)
+   */
+  async getCourseById(req, res, next) {
+    try {
+      const course = await courseRepository.findById(req.params.id);
+      if (!course) {
+        return response.error(res, 'Course not found', 404);
+      }
+      return response.success(res, { course }, 'Course retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Create course (admin)
    */
   async createCourse(req, res, next) {
@@ -132,6 +161,34 @@ class AdminController {
     try {
       await courseService.deleteCourse(req.params.id);
       return response.success(res, null, 'Course deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get all instructors (admin)
+   */
+  async getAllInstructors(req, res, next) {
+    try {
+      const result = await instructorRepository.findAll(req.query);
+      return response.success(res, result, 'Instructors retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get instructor by ID (admin)
+   */
+  async getInstructorById(req, res, next) {
+    try {
+      const includeCourses = req.query.includeCourses === 'true';
+      const instructor = await instructorRepository.findById(req.params.id, includeCourses);
+      if (!instructor) {
+        return response.error(res, 'Instructor not found', 404);
+      }
+      return response.success(res, { instructor }, 'Instructor retrieved successfully');
     } catch (error) {
       next(error);
     }

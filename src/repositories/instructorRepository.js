@@ -1,4 +1,4 @@
-const { Instructor, Course, CourseInstructor } = require('../models/index');
+const { Instructor, Course, CourseInstructor, Product } = require('../models/index');
 const { Op } = require('sequelize');
 
 class InstructorRepository {
@@ -22,7 +22,7 @@ class InstructorRepository {
         through: { attributes: ['role'] },
         include: [
           {
-            model: require('../models/Product'),
+            model: Product,
             as: 'product',
           },
         ],

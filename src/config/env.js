@@ -69,4 +69,7 @@ module.exports = {
   
   // CORS
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  
+  // Backend URL (for OAuth callbacks)
+  BACKEND_URL: process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3000}`,
 };

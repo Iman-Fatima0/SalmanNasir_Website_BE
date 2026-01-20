@@ -80,7 +80,7 @@ class UserRepository {
    * Find user by password reset token
    */
   async findByPasswordResetToken(token) {
-    const crypto = require('crypto');
+    const crypto = require('node:crypto');
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     return await User.findOne({

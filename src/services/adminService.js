@@ -1,5 +1,7 @@
 const adminRepository = require('../repositories/adminRepository');
 const { NotFoundError } = require('../utils/errors');
+const { validateOrderTransition } = require('../utils/stateMachine');
+const { Enrollment } = require('../models/index');
 
 class AdminService {
   /**
@@ -68,7 +70,7 @@ class AdminService {
   }
 
   /**
-   * Update order status
+   * Update order status with state machine validation
    */
   async updateOrderStatus(id, status, notes) {
     const order = await adminRepository.getOrderById(id);
@@ -76,12 +78,32 @@ class AdminService {
       throw new NotFoundError('Order not found');
     }
 
-    const validStatuses = ['pending', 'completed', 'cancelled', 'refunded'];
-    if (!validStatuses.includes(status)) {
-      throw new Error('Invalid order status');
+    // Validate state transition using state machine
+    const validation = validateOrderTransition(order.status, status);
+    if (!validation.valid) {
+      throw new Error(validation.message);
     }
 
-    return await adminRepository.updateOrderStatus(id, status, notes);
+    const updatedOrder = await adminRepository.updateOrderStatus(id, status, notes);
+
+    // When order is marked as completed, create enrollment (access unlock)
+    if (status === 'completed' && order.courseId) {
+      // Check if enrollment already exists
+      const existing = await Enrollment.findOne({
+        where: { userId: order.userId, courseId: order.courseId },
+      });
+
+      if (!existing) {
+        await Enrollment.create({
+          userId: order.userId,
+          courseId: order.courseId,
+          orderId: order.id,
+          status: 'ACTIVE',
+        });
+      }
+    }
+
+    return updatedOrder;
   }
 }
 
