@@ -38,13 +38,16 @@ class AuthService {
       throw new Error('User with this email already exists');
     }
 
+    // Normalize phone number (strip non-digits)
+    const normalizedPhone = phone ? phone.replace(/\D/g, '') : null;
+
     // Create user
     const user = await userRepository.create({
       email: email.toLowerCase(),
       password,
       firstName,
       lastName,
-      phone,
+      phone: normalizedPhone,
     });
 
     // Generate token
@@ -222,6 +225,43 @@ class AuthService {
       user: userResponse,
       token: authToken,
     };
+  }
+
+  /**
+   * Update user profile
+   */
+  async updateProfile(userId, updateData) {
+    // Only allow updating specific fields
+    const allowedFields = ['firstName', 'lastName', 'phone', 'profileImage'];
+    const filteredData = {};
+    
+    for (const field of allowedFields) {
+      if (updateData[field] !== undefined) {
+        // Normalize phone number (strip non-digits) if it's the phone field
+        if (field === 'phone' && updateData[field]) {
+          filteredData[field] = updateData[field].replace(/\D/g, '');
+        } else if (field === 'phone' && (updateData[field] === null || updateData[field] === '')) {
+          filteredData[field] = null;
+        } else {
+          filteredData[field] = updateData[field];
+        }
+      }
+    }
+
+    if (Object.keys(filteredData).length === 0) {
+      throw new Error('No valid fields to update');
+    }
+
+    // Update user
+    const updatedUser = await userRepository.update(userId, filteredData);
+
+    // Remove sensitive data
+    const userResponse = updatedUser.toJSON();
+    delete userResponse.password;
+    delete userResponse.passwordResetToken;
+    delete userResponse.passwordResetExpires;
+
+    return userResponse;
   }
 
   /**

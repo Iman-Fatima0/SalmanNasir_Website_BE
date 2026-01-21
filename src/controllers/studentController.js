@@ -19,6 +19,18 @@ class StudentController {
     }
   }
   /**
+   * Get all courses for the authenticated student (enrolled courses)
+   */
+  async getCourses(req, res, next) {
+    try {
+      const courses = await studentService.getCourses(req.user.id, req.query);
+      return response.success(res, courses, 'Courses retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Get all enrollments for the authenticated student
    */
   async getEnrollments(req, res, next) {

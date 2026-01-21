@@ -106,6 +106,19 @@ class AuthController {
       next(error);
     }
   }
+
+  /**
+   * Update current user profile
+   */
+  async updateMe(req, res, next) {
+    try {
+      const userId = req.user.id; // Set by auth middleware
+      const updatedUser = await authService.updateProfile(userId, req.body);
+      return response.success(res, { user: updatedUser }, 'Profile updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();

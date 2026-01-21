@@ -8,6 +8,7 @@ const {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  updateProfileSchema,
 } = require('../validators/authSchemas');
 
 const router = express.Router();
@@ -18,6 +19,7 @@ router.post('/login', validate(loginSchema), authController.login);
 router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
 router.get('/me', authenticate, authController.getMe);
+router.put('/me', authenticate, validate(updateProfileSchema), authController.updateMe);
 
 // OAuth routes - Google
 // Accept optional ?state=<courseId> so we can preserve course context through OAuth

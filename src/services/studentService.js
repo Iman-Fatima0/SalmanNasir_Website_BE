@@ -73,6 +73,65 @@ class StudentService {
     };
   }
   /**
+   * Get all courses for a student (enrolled courses)
+   */
+  async getCourses(userId, options = {}) {
+    const enrollments = await Enrollment.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Course,
+          as: 'course',
+          include: [
+            {
+              model: Product,
+              as: 'product',
+            },
+            {
+              model: Chapter,
+              as: 'chapters',
+              include: [
+                {
+                  model: Lesson,
+                  as: 'lessons',
+                  attributes: ['id', 'title', 'order', 'durationMinutes', 'isPreview'],
+                },
+              ],
+              order: [['order', 'ASC']],
+            },
+          ],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+
+    // Calculate progress for each enrollment and format response
+    const courses = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const progress = await this.calculateProgress(enrollment.id);
+        const course = enrollment.course;
+        
+        return {
+          ...course.toJSON(),
+          enrollment: {
+            id: enrollment.id,
+            status: enrollment.status,
+            enrolledAt: enrollment.createdAt,
+            lastAccessedAt: enrollment.lastAccessedAt,
+            completionPercentage: enrollment.completionPercentage,
+          },
+          progress,
+        };
+      })
+    );
+
+    return {
+      courses,
+      total: courses.length,
+    };
+  }
+
+  /**
    * Get all enrollments for a student
    */
   async getEnrollments(userId, options = {}) {

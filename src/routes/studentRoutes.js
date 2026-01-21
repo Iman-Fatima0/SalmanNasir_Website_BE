@@ -11,6 +11,9 @@ const router = express.Router();
 router.use(authenticate);
 router.use(isStudent);
 
+// Courses (enrolled courses)
+router.get('/courses', studentController.getCourses);
+
 // Manual checkout (submit order + payment proof)
 router.post('/checkout', validate(manualCheckoutSchema), studentController.manualCheckout);
 
