@@ -26,6 +26,49 @@ class StudentController {
       const courses = await studentService.getCourses(req.user.id, req.query);
       return response.success(res, courses, 'Courses retrieved successfully');
     } catch (error) {
+      console.error('Error in getCourses controller:', error);
+      console.error('Error stack:', error.stack);
+      next(error);
+    }
+  }
+
+  /**
+   * Get a single course by ID (must be enrolled)
+   */
+  async getCourseById(req, res, next) {
+    try {
+      const course = await studentService.getCourseById(req.params.id, req.user.id);
+      return response.success(res, course, 'Course retrieved successfully');
+    } catch (error) {
+      console.error('Error in getCourseById controller:', error);
+      console.error('Error stack:', error.stack);
+      next(error);
+    }
+  }
+
+  /**
+   * Get all orders for the authenticated student (purchase history)
+   */
+  async getOrders(req, res, next) {
+    try {
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/08431233-e53a-4860-9ccd-3efe6444419f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'studentController.js:getOrders:entry',message:'Controller getOrders called',data:{userId:req.user?.id,hasUser:!!req.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
+      // #endregion
+      
+      const orders = await studentService.getOrders(req.user.id, req.query);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/08431233-e53a-4860-9ccd-3efe6444419f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'studentController.js:getOrders:success',message:'Service returned successfully',data:{ordersIsArray:Array.isArray(orders),ordersLength:orders?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'K'})}).catch(()=>{});
+      // #endregion
+      
+      return response.success(res, orders, 'Orders retrieved successfully');
+    } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/08431233-e53a-4860-9ccd-3efe6444419f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'studentController.js:getOrders:catch',message:'Controller error caught',data:{errorMessage:error.message,errorName:error.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'L'})}).catch(()=>{});
+      // #endregion
+      
+      console.error('Error in getOrders controller:', error);
+      console.error('Error stack:', error.stack);
       next(error);
     }
   }
@@ -38,6 +81,8 @@ class StudentController {
       const enrollments = await studentService.getEnrollments(req.user.id, req.query);
       return response.success(res, enrollments, 'Enrollments retrieved successfully');
     } catch (error) {
+      console.error('Error in getEnrollments controller:', error);
+      console.error('Error stack:', error.stack);
       next(error);
     }
   }

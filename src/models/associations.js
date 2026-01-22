@@ -461,7 +461,7 @@ function defineAssociations(models) {
   // Product <-> Order (One-to-Many)
   Product.hasMany(Order, {
     foreignKey: 'productId',
-    as: 'orders',
+    as: 'productOrders',
     onDelete: 'CASCADE',
   });
   Order.belongsTo(Product, {
@@ -472,7 +472,7 @@ function defineAssociations(models) {
   // Course <-> Order (One-to-Many)
   Course.hasMany(Order, {
     foreignKey: 'courseId',
-    as: 'orders',
+    as: 'courseOrders',
     onDelete: 'SET NULL',
   });
   Order.belongsTo(Course, {

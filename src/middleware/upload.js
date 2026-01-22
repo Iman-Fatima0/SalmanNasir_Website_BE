@@ -80,10 +80,27 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 500 * 1024 * 1024, // 500MB max file size
+    fileSize: 10 * 1024 * 1024, // 10MB max file size for images (reduced from 500MB)
     fieldSize: 10 * 1024 * 1024, // 10MB max field size
   },
 });
+
+// Upload configuration for profile images (smaller size limit)
+const uploadProfileImage = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Invalid file type. Allowed types: ${allowedMimes.join(', ')}`), false);
+    }
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max for profile images
+    fieldSize: 10 * 1024 * 1024,
+  },
+}).single('image');
 
 // Specific upload handlers
 const uploadVideo = upload.single('video');
@@ -104,20 +121,32 @@ const uploadLessonFiles = upload.fields([
 const handleUploadError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
+      const maxSize = req.route?.path?.includes('profile-image') ? '10MB' : '500MB';
       return res.status(400).json({
         success: false,
-        message: 'File too large. Maximum size is 500MB',
+        message: `File too large. Maximum size is ${maxSize}`,
+        error: err.code,
       });
     }
+    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      return res.status(400).json({
+        success: false,
+        message: 'Unexpected file field. Use "image" field for image uploads',
+        error: err.code,
+      });
+    }
+    console.error('Multer error:', err);
     return res.status(400).json({
       success: false,
-      message: err.message,
+      message: err.message || 'File upload error',
+      error: err.code,
     });
   }
   if (err) {
+    console.error('Upload error:', err);
     return res.status(400).json({
       success: false,
-      message: err.message,
+      message: err.message || 'File upload failed',
     });
   }
   next();
@@ -129,6 +158,7 @@ module.exports = {
   uploadAudio,
   uploadPdf,
   uploadImage,
+  uploadProfileImage,
   uploadThumbnail,
   uploadLessonFiles,
   handleUploadError,

@@ -1,41 +1,48 @@
-feat: Add student courses endpoint, profile update API, and phone validation
+feat: Add student endpoints, profile image upload, and comprehensive lesson seeder
 
-- Add GET /api/student/courses endpoint to retrieve enrolled courses with progress
-  - Returns courses with enrollment info, progress tracking, and course details
-  - Includes chapters, lessons, and product information
+## Student Endpoints
+- Add GET /api/student/courses - Get all enrolled courses with progress
+- Add GET /api/student/courses/:id - Get single enrolled course details
+- Add GET /api/student/orders - Get all purchase history (pending and approved)
+- Improve error handling and logging in student service and controller
+- Add enrollment status mapping to orders response
 
-- Add PUT /api/auth/me endpoint for user profile updates
-  - Allows updating firstName, lastName, phone, and profileImage
-  - Includes validation schema for profile updates
-  - Normalizes phone numbers before storage
+## Profile Image Upload
+- Add POST /api/upload/profile-image - Allow authenticated users to upload profile images
+- Separate multer config for profile images (10MB limit)
+- Keep existing /api/upload/image for admin/instructor use
+- Improve upload error handling with detailed error messages
+- Increase Express body parsing limits to 50MB
 
-- Implement phone number validation (11-15 digits)
-  - Accepts formatted phone numbers (spaces, dashes, plus signs)
-  - Validates digit count after stripping non-digits
-  - Normalizes phone numbers to digits-only format in database
-  - Applied to both signup and profile update schemas
+## Lesson Seeder Enhancement
+- Add comprehensive lesson content with all types:
+  - VIDEO lessons with sample video URLs
+  - AUDIO lessons with sample audio URLs
+  - PDF lessons with sample PDF URLs
+  - TEXT lessons with rich markdown content (Arabic vocabulary, grammar)
+  - QUIZ lessons with questions and answers
+- Mix of content types across chapters (5-6 lessons per chapter)
+- Realistic sample content for testing and demonstration
 
-- Add updateProfile service method in authService
-  - Filters allowed fields for security
-  - Normalizes phone numbers before saving
+## Model Associations
+- Fix Order-Product and Order-Course association aliases to prevent conflicts
+- Ensure unique aliases: productOrders and courseOrders
 
-- Add getCourses service method in studentService
-  - Retrieves enrolled courses with progress calculation
-  - Includes enrollment metadata and course details
+## Error Handling
+- Improve error logging in studentController with stack traces
+- Enhanced error handler middleware for Sequelize-specific errors
+- Better error messages for upload failures
 
-- Add frontend implementation guide
-  - Complete examples for profile update functionality
-  - Phone number validation utilities
-  - React component examples
+## Documentation
+- Add FRONTEND_API_GUIDE.md - Complete API documentation for frontend
+- Add FRONTEND_TASKS.md - Actionable checklist for frontend implementation
+- Add FRONTEND_PURCHASE_FLOW.md - Purchase history vs My Courses flow guide
+- Add FRONTEND_FORGOT_PASSWORD_GUIDE.md - Complete forgot password flow
+- Add IMAGE_UPLOAD_FIX.md - Image upload troubleshooting guide
+- Add SEEDER_CONTENT_GUIDE.md - Lesson seeder content documentation
 
-Files modified:
-- src/controllers/authController.js (add updateMe method)
-- src/controllers/studentController.js (add getCourses method)
-- src/routes/authRoutes.js (add PUT /me route)
-- src/routes/studentRoutes.js (add GET /courses route)
-- src/services/authService.js (add updateProfile method, phone normalization)
-- src/services/studentService.js (add getCourses method)
-- src/validators/authSchemas.js (add updateProfileSchema, phone validation)
-
-Files added:
-- FRONTEND_IMPLEMENTATION_GUIDE.md (comprehensive frontend integration guide)
+## Technical Improvements
+- Add robust null checks and error handling in studentService
+- Improve data fetching with required: false for optional associations
+- Better handling of missing course/product data in orders
+- Add progress calculation with error resilience

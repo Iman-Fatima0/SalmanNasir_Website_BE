@@ -13,6 +13,10 @@ router.use(isStudent);
 
 // Courses (enrolled courses)
 router.get('/courses', studentController.getCourses);
+router.get('/courses/:id', studentController.getCourseById);
+
+// Orders (purchase history)
+router.get('/orders', studentController.getOrders);
 
 // Manual checkout (submit order + payment proof)
 router.post('/checkout', validate(manualCheckoutSchema), studentController.manualCheckout);

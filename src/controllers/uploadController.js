@@ -93,7 +93,35 @@ class UploadController {
   }
 
   /**
-   * Upload image file
+   * Upload profile image (for authenticated users)
+   * POST /api/upload/profile-image
+   */
+  async uploadProfileImage(req, res, next) {
+    try {
+      if (!req.file) {
+        return response.error(res, 'No image file provided', 400);
+      }
+
+      const fileUrl = `/uploads/images/${req.file.filename}`;
+      return response.success(
+        res,
+        {
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          size: req.file.size,
+          mimetype: req.file.mimetype,
+          url: fileUrl,
+          fullUrl: `${req.protocol}://${req.get('host')}${fileUrl}`,
+        },
+        'Profile image uploaded successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Upload image file (admin/instructor only)
    * POST /api/upload/image
    */
   async uploadImage(req, res, next) {

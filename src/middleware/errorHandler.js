@@ -8,9 +8,21 @@ const errorHandler = (err, req, res, _next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Log error (only in development)
-  if (process.env.NODE_ENV === 'development') {
-    console.error('Error:', err);
+  // Log error (always log in development, log in production for 500 errors)
+  if (process.env.NODE_ENV === 'development' || (!error.statusCode || error.statusCode >= 500)) {
+    console.error('\n=== ERROR ===');
+    console.error('Name:', err.name);
+    console.error('Message:', err.message);
+    console.error('Stack:', err.stack);
+    console.error('Request Method:', req.method);
+    console.error('Request Path:', req.path);
+    if (req.body && Object.keys(req.body).length > 0) {
+      console.error('Request Body:', JSON.stringify(req.body, null, 2));
+    }
+    if (err.original) {
+      console.error('Original Error:', err.original);
+    }
+    console.error('================\n');
   }
 
   // Sequelize validation error
@@ -22,6 +34,22 @@ const errorHandler = (err, req, res, _next) => {
   // Sequelize unique constraint error
   if (err.name === 'SequelizeUniqueConstraintError') {
     return response.error(res, 'Duplicate field value', 400);
+  }
+
+  // Sequelize database connection error
+  if (err.name === 'SequelizeConnectionError' || err.name === 'SequelizeConnectionRefusedError') {
+    return response.error(res, 'Database connection error. Please try again later.', 503);
+  }
+
+  // Sequelize foreign key constraint error
+  if (err.name === 'SequelizeForeignKeyConstraintError') {
+    return response.error(res, 'Invalid reference. The related record does not exist.', 400);
+  }
+
+  // Sequelize database error
+  if (err.name && err.name.startsWith('Sequelize')) {
+    const message = err.message || 'Database error occurred';
+    return response.error(res, message, 500);
   }
 
   // JWT errors

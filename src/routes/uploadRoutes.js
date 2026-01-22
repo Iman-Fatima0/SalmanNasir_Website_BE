@@ -6,6 +6,7 @@ const {
   uploadAudio,
   uploadPdf,
   uploadImage,
+  uploadProfileImage,
   uploadLessonFiles,
   handleUploadError,
 } = require('../middleware/upload');
@@ -68,6 +69,16 @@ router.post(
   uploadController.uploadPdf
 );
 
+// Profile image upload (authenticated users only)
+router.post(
+  '/profile-image',
+  authenticate,
+  uploadProfileImage,
+  handleUploadError,
+  uploadController.uploadProfileImage
+);
+
+// General image upload (admin and instructor only)
 router.post(
   '/image',
   authenticate,
