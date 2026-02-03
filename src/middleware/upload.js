@@ -75,17 +75,23 @@ const storage = multer.diskStorage({
   },
 });
 
+// Max file size: 500MB for videos/PDFs/audio
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
+
 // Upload configuration
 const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max file size for images (reduced from 500MB)
-    fieldSize: 10 * 1024 * 1024, // 10MB max field size
+    fileSize: MAX_FILE_SIZE,
+    fieldSize: MAX_FILE_SIZE,
   },
 });
 
-// Upload configuration for profile images (smaller size limit)
+// Profile images: 50MB (plenty for high-res photos)
+const MAX_PROFILE_IMAGE_SIZE = 50 * 1024 * 1024;
+
+// Upload configuration for profile images
 const uploadProfileImage = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -97,8 +103,8 @@ const uploadProfileImage = multer({
     }
   },
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max for profile images
-    fieldSize: 10 * 1024 * 1024,
+    fileSize: MAX_PROFILE_IMAGE_SIZE,
+    fieldSize: MAX_PROFILE_IMAGE_SIZE,
   },
 }).single('image');
 
@@ -121,7 +127,7 @@ const uploadLessonFiles = upload.fields([
 const handleUploadError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      const maxSize = req.route?.path?.includes('profile-image') ? '10MB' : '500MB';
+      const maxSize = req.route?.path?.includes('profile-image') ? '50MB' : '500MB';
       return res.status(400).json({
         success: false,
         message: `File too large. Maximum size is ${maxSize}`,

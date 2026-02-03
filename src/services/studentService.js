@@ -15,6 +15,16 @@ const {
 } = require('../models/index');
 const { NotFoundError, ForbiddenError } = require('../utils/errors');
 const { Op } = require('sequelize');
+const config = require('../config/env');
+
+/** If url is a relative path, return absolute URL using backend base; otherwise return as-is. */
+function toAbsoluteMediaUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  const base = (config.BACKEND_URL || '').replace(/\/$/, '');
+  return trimmed.startsWith('/') ? `${base}${trimmed}` : `${base}/${trimmed}`;
+}
 
 class StudentService {
   /**
@@ -215,7 +225,7 @@ class StudentService {
                   {
                     model: Lesson,
                     as: 'lessons',
-                    attributes: ['id', 'title', 'description', 'order', 'durationMinutes', 'isPreview', 'type', 'videoUrl', 'audioUrl', 'contentUrl'],
+                    attributes: ['id', 'title', 'description', 'order', 'durationMinutes', 'isPreview', 'type', 'videoUrl', 'audioUrl', 'contentUrl', 'textContent'],
                     required: false,
                   },
                 ],
@@ -237,8 +247,22 @@ class StudentService {
       // Calculate progress
       const progress = await this.calculateProgress(enrollment.id);
 
-      // Format response
+      // Format response and ensure lesson media URLs are absolute (so frontend can load from another origin)
       const course = enrollment.course.toJSON();
+      if (course.chapters && Array.isArray(course.chapters)) {
+        course.chapters = course.chapters.map((ch) => {
+          if (!ch.lessons || !Array.isArray(ch.lessons)) return ch;
+          return {
+            ...ch,
+            lessons: ch.lessons.map((lesson) => ({
+              ...lesson,
+              videoUrl: lesson.videoUrl ? toAbsoluteMediaUrl(lesson.videoUrl) : lesson.videoUrl,
+              audioUrl: lesson.audioUrl ? toAbsoluteMediaUrl(lesson.audioUrl) : lesson.audioUrl,
+              contentUrl: lesson.contentUrl ? toAbsoluteMediaUrl(lesson.contentUrl) : lesson.contentUrl,
+            })),
+          };
+        });
+      }
       return {
         ...course,
         enrollment: {
@@ -246,7 +270,7 @@ class StudentService {
           status: enrollment.status,
           enrolledAt: enrollment.createdAt,
           lastAccessedAt: enrollment.lastAccessedAt,
-          completionPercentage: enrollment.completionPercentage,
+          completionPercentage: Number(enrollment.progressPercentage) ?? 0,
         },
         progress,
       };
@@ -311,7 +335,7 @@ class StudentService {
             userId,
             orderId: { [Op.in]: orderIds },
           },
-          attributes: ['id', 'orderId', 'status', 'completionPercentage'],
+          attributes: ['id', 'orderId', 'status', 'progressPercentage'],
         });
       }
       
@@ -362,7 +386,7 @@ class StudentService {
           enrollment: enrollment ? {
             id: enrollment.id,
             status: enrollment.status,
-            completionPercentage: enrollment.completionPercentage,
+            completionPercentage: enrollment.progressPercentage || 0,
           } : null,
           // Ensure course info is available (use product info as fallback)
           course: orderData.course || (orderData.product ? {

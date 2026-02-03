@@ -181,10 +181,11 @@ Authorization: Bearer <token>
           "order": 1,
           "durationMinutes": 10,
           "isPreview": false,
-          "type": "video",
+          "type": "VIDEO",
           "videoUrl": "url",
-          "audioUrl": "url",
-          "contentUrl": "url"
+          "audioUrl": null,
+          "contentUrl": null,
+          "textContent": null
         }
       ]
     }
@@ -205,6 +206,8 @@ Authorization: Bearer <token>
   }
 }
 ```
+
+**Displaying lesson content:** Each lesson has `type` (`VIDEO`, `AUDIO`, `PDF`, `TEXT`, `QUIZ`) and the matching content field (`videoUrl`, `audioUrl`, `contentUrl`, `textContent`). See **LESSON_CONTENT_DISPLAY.md** for how to render each type on the learn page.
 
 **Error Responses:**
 - `401`: Unauthorized
