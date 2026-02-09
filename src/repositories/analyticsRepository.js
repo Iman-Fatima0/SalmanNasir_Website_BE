@@ -386,10 +386,14 @@ class AnalyticsRepository {
       },
     });
 
-    // Get checkout initiations (orders in processing status)
+    // Get checkout initiations.
+    // NOTE: Our Order.status enum only supports:
+    // 'pending', 'completed', 'cancelled', 'refunded'.
+    // We don't have a separate 'processing' state in the database,
+    // so we approximate \"checkout initiated\" using the same 'pending' state.
     const checkoutInitiations = await Order.count({
       where: {
-        status: 'processing',
+        status: 'pending',
         createdAt: {
           [Op.gte]: thirtyDaysAgo,
         },
@@ -455,14 +459,21 @@ class AnalyticsRepository {
     // For now, we'll return overall funnel
 
     // Calculate time to conversion (average time from signup to first purchase)
+    // NOTE: Postgres does not allow nested aggregates like AVG(MIN(...)),
+    // so we first compute per-user conversion time in a subquery,
+    // then take the AVG over that result.
     const timeToConversion = await User.sequelize.query(
       `
       SELECT 
-        AVG(EXTRACT(EPOCH FROM (MIN(o."createdAt") - u."createdAt")) / 86400) as avg_days_to_conversion
-      FROM users u
-      INNER JOIN orders o ON o."userId" = u.id AND o.status = 'completed'
-      WHERE u."createdAt" >= :thirtyDaysAgo
-      GROUP BY u.id
+        AVG(days_to_conversion) AS avg_days_to_conversion
+      FROM (
+        SELECT 
+          EXTRACT(EPOCH FROM (MIN(o."createdAt") - u."createdAt")) / 86400 AS days_to_conversion
+        FROM users u
+        INNER JOIN orders o ON o."userId" = u.id AND o.status = 'completed'
+        WHERE u."createdAt" >= :thirtyDaysAgo
+        GROUP BY u.id
+      ) AS per_user
       `,
       {
         type: User.sequelize.QueryTypes.SELECT,
